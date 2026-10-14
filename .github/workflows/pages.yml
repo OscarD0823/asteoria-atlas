@@ -1,40 +1,19 @@
-name: Publicar Prisma Arquitectura
+name: Publicar Asteoria Atlas BETA
 on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '12,27,42,57 * * * *'
 permissions:
   contents: read
   pages: write
   id-token: write
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: github-pages
+  cancel-in-progress: false
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    env:
-      ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist-arquitectura
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Desplegar
-        id: deployment
-        uses: actions/deploy-pages@v4
+  product:
+    uses: OscarD0823/asteoria/.github/workflows/product-pages.yml@main
+    with:
+      kind: architecture
