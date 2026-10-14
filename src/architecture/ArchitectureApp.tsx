@@ -120,5 +120,3 @@ export default function Architecture() {
     </section></div>}
   </div><div className="pa-print"><h1>{project.name}</h1><p>{level.name} · {meters(area)} m² · Prisma Arquitectura</p><div dangerouslySetInnerHTML={{ __html: printSvg }}/></div></UnitContext.Provider>;
 }
-
-
