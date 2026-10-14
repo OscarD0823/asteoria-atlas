@@ -1,0 +1,40 @@
+appId: com.oscard.prismaarquitectura
+productName: Prisma Arquitectura
+directories:
+  output: release-arquitectura
+extraMetadata:
+  name: prisma-arquitectura
+  version: 0.2.0
+  main: desktop/architecture.cjs
+files:
+  - dist-arquitectura/**/*
+  - desktop/architecture.cjs
+  - desktop/architecture-preload.cjs
+  - package.json
+  - "!node_modules/**/*"
+extraResources:
+  - from: dist-arquitectura/prisma-arquitectura-source.tar.gz
+    to: prisma-arquitectura-source.tar.gz
+asar: true
+fileAssociations:
+  - ext: prisma-arquitectura
+    name: Proyecto Prisma Arquitectura
+    role: Editor
+    icon: public/icons/prisma.ico
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+  icon: public/icons/prisma.ico
+  signExecutable: false
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  artifactName: Prisma-Arquitectura-${version}-Windows-Setup.exe
+portable:
+  artifactName: Prisma-Arquitectura-${version}-Windows-Portable.exe

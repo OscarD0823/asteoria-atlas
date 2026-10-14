@@ -1,0 +1,35 @@
+{
+  "name": "prisma-arquitectura",
+  "version": "0.2.0",
+  "description": "Editor local de planos, mobiliario, iluminación y recorridos 3D para Prisma.",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "author": "OscarD0823",
+  "main": "desktop/architecture.cjs",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 4196",
+    "build": "node scripts/build.mjs",
+    "test": "tsx --test tests/architecture.test.ts",
+    "desktop:dev": "electron .",
+    "desktop:build": "npm run build && electron-builder --config electron-builder-arquitectura.yml --win --x64"
+  },
+  "dependencies": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "lucide-react": "0.468.0",
+    "three": "0.186.0",
+    "pdf-lib": "1.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/three": "0.184.0",
+    "@vitejs/plugin-react": "4.7.0",
+    "vite": "7.3.7",
+    "typescript": "5.8.3",
+    "tsx": "4.23.15",
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3"
+  }
+}

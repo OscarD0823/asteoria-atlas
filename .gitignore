@@ -1,0 +1,5 @@
+node_modules/
+dist-arquitectura/
+release-arquitectura/
+*.log
+.DS_Store
