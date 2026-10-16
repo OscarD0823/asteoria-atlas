@@ -1,3 +1,4 @@
+import { actuateModel } from './motion';
 import * as T from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { modelFactory } from './procedural-models';
@@ -10,7 +11,7 @@ type Template={geometry:T.BufferGeometry;material:T.MeshStandardMaterial;triangl
 type Binding={mesh:T.InstancedMesh;far:T.InstancedMesh;index:number;proxy:T.Group;dimensions:T.Vector3};
 type Cell={near:T.InstancedMesh;far:T.InstancedMesh;center:T.Vector3;bindings:Binding[];nearMode:boolean;triangles:number};
 export function furnitureInstances(parent:T.Group,objects:Map<string,T.Object3D>,onReady?:()=>void){
- let disposed=false;
+ let disposed=false;const hidden=new Set<string>();
  const factory=modelFactory(),templates=new Map<string,Template>(),proxies=new Map<string,T.Group>(),bindings=new Map<string,Binding>(),cells:Cell[]=[],group=new T.Group(),boxGeometry=new T.BoxGeometry(1,1,1),boundsMaterial=new T.MeshBasicMaterial({visible:false}),lowMaterial=new T.MeshStandardMaterial({color:'#ffffff',roughness:.7});
  boxGeometry.userData.retained=true;boundsMaterial.userData.retained=true;lowMaterial.userData.retained=true;parent.add(group);
  let lastAssets:MeshAsset[]|null=null;
@@ -36,7 +37,7 @@ export function furnitureInstances(parent:T.Group,objects:Map<string,T.Object3D>
     shader.fragmentShader=shader.fragmentShader.replace('#include <emissivemap_fragment>','#include <emissivemap_fragment>\n totalEmissiveRadiance+=diffuseColor.rgb*vSurface.z;');
   };material.customProgramCacheKey=()=> 'auralis-surface-pbr-v2';geometry.userData.retained=true;material.userData.retained=true;geometry.computeBoundingBox();geometry.computeBoundingSphere();cached={geometry,material,normalization,triangles:geometry.getAttribute('position').count/3};templates.set(key,cached);return cached;
  }
- function update(binding:Binding){const o=binding.proxy;rotation.setFromEuler(o.rotation);scale.copy(binding.dimensions).multiply(o.scale);matrix.compose(o.position,rotation,scale);binding.mesh.setMatrixAt(binding.index,matrix);binding.mesh.instanceMatrix.needsUpdate=true;if(binding.far){const lowPosition=o.position.clone().add(new T.Vector3(0,scale.y/2,0));matrix.compose(lowPosition,rotation,scale);binding.far.setMatrixAt(binding.index,matrix);binding.far.instanceMatrix.needsUpdate=true;}binding.mesh.boundingSphere=null;binding.far.boundingSphere=null;}
+ function update(binding:Binding){const o=binding.proxy;rotation.setFromEuler(o.rotation);scale.copy(binding.dimensions).multiply(o.scale);if(hidden.has(o.userData.selection.id))scale.setScalar(0);matrix.compose(o.position,rotation,scale);binding.mesh.setMatrixAt(binding.index,matrix);binding.mesh.instanceMatrix.needsUpdate=true;if(binding.far){const lowPosition=o.position.clone().add(new T.Vector3(0,scale.y/2,0));matrix.compose(lowPosition,rotation,scale);binding.far.setMatrixAt(binding.index,matrix);binding.far.instanceMatrix.needsUpdate=true;}binding.mesh.boundingSphere=null;binding.far.boundingSphere=null;}
  function clear(){for(const c of cells){c.near.dispose();c.far.dispose();}for(const id of proxies.keys())objects.delete(`furniture:${id}`);group.clear();cells.length=0;bindings.clear();proxies.clear();}
  function sync(items:Furniture[],assets:MeshAsset[]){
   if(lastAssets!==assets){for(const [key,t]of templates)if(key.startsWith('custom:')){t.geometry.dispose();t.material.map?.dispose();t.material.dispose();templates.delete(key);}lastAssets=assets;clear();}
@@ -52,6 +53,16 @@ export function furnitureInstances(parent:T.Group,objects:Map<string,T.Object3D>
   for(const {c,distance} of ranked){const visible=full||!walking||distance<p.distance,selected=selectedId&&c.bindings.some(b=>b.proxy.userData.selection.id===selectedId),allowed=triangles+c.triangles<=p.triangles*(full?4:1)&&objects+c.bindings.length<=p.objects;c.nearMode=!!selected||(full||distance<p.detail)&&allowed;c.near.visible=visible&&c.nearMode;c.far.visible=visible&&!c.nearMode;if(c.near.visible){triangles+=c.triangles;objects+=c.bindings.length;}}
  }
 
+ function setHidden(id:string,value:boolean){if(value)hidden.add(id);else hidden.delete(id);const binding=bindings.get(id);if(binding)update(binding);}
+ function detailed(f:Furniture,assets:MeshAsset[]){
+  const original=furnitureCatalog.find(item=>item.kind===f.kind);if(!original)throw Error('El modelo importado no tiene articulaciones.');
+  const base=template({...f,on:false,open:false},assets),object=factory.create({...f,...original,color:f.color,on:true,open:false,x:0,y:0,elevation:0,rotation:0}),wrapper=new T.Group(),root=new T.Group();
+  wrapper.add(object);wrapper.applyMatrix4(base.normalization!.clone().multiply(new T.Matrix4().makeScale(1/original.width,1/original.height,1/original.depth)));root.add(wrapper);root.position.set(f.x,f.elevation,f.y);root.rotation.y=-f.rotation*Math.PI/180;root.scale.set(f.width,f.height,f.depth);root.userData.selection={kind:'furniture',id:f.id};
+  const materials=new Map<T.MeshStandardMaterial,T.MeshStandardMaterial>(),parts:{mesh:T.Mesh;material:T.MeshStandardMaterial;color:T.Color;emission:number;display:boolean;powerOnly:boolean}[]=[];
+  object.traverse(node=>{if(node instanceof T.Mesh){const source=node.material as T.MeshStandardMaterial;let material=materials.get(source);if(!material){material=source.clone();materials.set(source,material);}node.material=material;parts.push({mesh:node,material,color:material.color.clone(),emission:material.emissiveIntensity,display:!!node.userData.display,powerOnly:!!node.userData.powerPart});}});
+  for(const source of materials.keys())if(source.userData.transient)source.dispose();
+  return {root,update(open:number,on:number){actuateModel(object,open);for(const p of parts){if(p.display)p.material.color.copy(p.color).lerp(new T.Color('#0c1215'),1-on);p.material.emissiveIntensity=p.emission*on;if(p.powerOnly){p.mesh.visible=on>.001;p.material.transparent=true;p.material.depthWrite=false;p.material.opacity=on;}}},dispose(){root.removeFromParent();for(const material of materials.values())material.dispose();}};
+ }
  function ghost(f:Furniture,assets:MeshAsset[]){const t=template(f,assets),m=new T.MeshBasicMaterial({color:'#9978cc',transparent:true,opacity:.35,depthWrite:false}),o=new T.Mesh(t.geometry,m);o.scale.set(f.width,f.height,f.depth);o.position.set(f.x,f.elevation,f.y);o.rotation.y=-f.rotation*Math.PI/180;return o;}
- return{sync,visibility,ghost,group,clear,stats:()=>({templates:templates.size,instances:proxies.size,cells:cells.length,visibleTriangles:cells.filter(c=>c.near.visible).reduce((n,c)=>n+c.triangles,0),geometryBytes:[...templates.values()].reduce((n,t)=>n+Object.values(t.geometry.attributes).reduce((n,a)=>n+a.array.byteLength,0),0)}),dispose:()=>{disposed=true;clear();templates.forEach(t=>{t.geometry.dispose();t.material.map?.dispose();t.material.dispose();});templates.clear();factory.dispose();boxGeometry.dispose();boundsMaterial.dispose();lowMaterial.dispose();}};
+ return{sync,visibility,ghost,detailed,setHidden,group,clear,stats:()=>({templates:templates.size,instances:proxies.size,cells:cells.length,visibleTriangles:cells.filter(c=>c.near.visible).reduce((n,c)=>n+c.triangles,0),geometryBytes:[...templates.values()].reduce((n,t)=>n+Object.values(t.geometry.attributes).reduce((n,a)=>n+a.array.byteLength,0),0)}),dispose:()=>{disposed=true;hidden.clear();clear();templates.forEach(t=>{t.geometry.dispose();t.material.map?.dispose();t.material.dispose();});templates.clear();factory.dispose();boxGeometry.dispose();boundsMaterial.dispose();lowMaterial.dispose();}};
 }

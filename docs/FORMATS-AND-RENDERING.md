@@ -37,6 +37,10 @@ Apunta con la cruz a un objeto situado a menos de 2,8 m. La acción aparece junt
 
 Los estados de apertura y encendido se guardan. La postura del visitante es temporal. El movimiento tiene aceleración suave, altura de ojos y campo de visión ajustable entre 45° y 90°. No hay simulación completa de física ni escaleras transitables.
 
+La cámara hace una transición gradual al entrar o salir del recorrido, centrar el proyecto, sentarse, acostarse y levantarse. Puertas, ventanas, armarios, electrodomésticos y cortinas recorren posiciones intermedias; las lámparas y pantallas encienden y apagan progresivamente. La vista orbital conserva una inercia breve al soltar el ratón. Se respeta la preferencia del sistema de reducir movimiento.
+
+Solo se separan temporalmente de las instancias hasta ocho muebles que estén animándose. Al terminar, vuelven al conjunto compartido. En edición, el bucle de animación se detiene cuando no queda movimiento. Las imágenes exportadas usan el estado final de las acciones.
+
 ## Luz, materiales y render
 
 Los materiales instanciados conservan la rugosidad y metalicidad de cada parte, junto con una variación superficial filtrada para evitar parpadeo a distancia. Se reutilizan geometrías y plantillas entre objetos iguales y sus estados.
