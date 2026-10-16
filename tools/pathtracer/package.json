@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "esbuild": "0.25.12",
+    "three": "0.186.0",
+    "three-gpu-pathtracer": "0.0.27",
+    "three-mesh-bvh": "0.9.15",
+    "xatlas-web": "0.1.0"
+  },
+  "name": "auralis-atlas-optional-renderer",
+  "private": true
+}

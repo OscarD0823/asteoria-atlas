@@ -1,3 +1,4 @@
+import { openingIsOpen } from './walk-actions';
 import { projectPoint, resolvedWalls, wallOpenings, type Furniture, type Point, type Project, type ResolvedWall } from './model';
 type Collider={wall?:ResolvedWall;doors?:ReturnType<typeof wallOpenings>;furniture?:Furniture};
 const cache=new WeakMap<Project,Map<string,Map<string,Collider[]>>>(),cell=4;
@@ -10,7 +11,7 @@ function index(project:Project,levelId:string){
 }
 export function indexedCanWalk(project:Project,levelId:string,p:Point,radius=.18){
  const cells=index(project,levelId),candidates=[...(cells.get(`${Math.floor(p.x/cell)}:${Math.floor(p.y/cell)}`)??[]),...(cells.get('*')??[])];
- for(const c of candidates){if(c.wall){const wall=c.wall,nearest=projectPoint(p,wall);if(nearest.distance>=wall.thickness/2+radius)continue;if(!c.doors!.some(o=>o.kind==='door'&&o.height>=project.environment.eyeHeight+.05&&Math.abs(nearest.offset-o.offset)<=o.width/2-radius))return false;}
+ for(const c of candidates){if(c.wall){const wall=c.wall,nearest=projectPoint(p,wall);if(nearest.distance>=wall.thickness/2+radius)continue;if(!c.doors!.some(o=>o.kind==='door'&&openingIsOpen(o)&&o.height>=project.environment.eyeHeight+.05&&Math.abs(nearest.offset-o.offset)<=o.width/2-radius))return false;}
   if(c.furniture){const f=c.furniture;if(f.elevation>=project.environment.eyeHeight+.15)continue;const a=f.rotation*Math.PI/180,dx=p.x-f.x,dy=p.y-f.y,x=Math.cos(a)*dx+Math.sin(a)*dy,y=-Math.sin(a)*dx+Math.cos(a)*dy;if(Math.abs(x)<f.width/2+radius&&Math.abs(y)<f.depth/2+radius)return false;}}
  return true;
 }

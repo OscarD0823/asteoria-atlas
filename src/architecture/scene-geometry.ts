@@ -1,3 +1,4 @@
+import { lightRange } from './walk-actions';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
@@ -79,8 +80,8 @@ export function lightMesh(data: SceneLight, shadowsAllowed: boolean) {
     const panel = new THREE.Mesh(new THREE.PlaneGeometry(data.width, data.depth), new THREE.MeshStandardMaterial({ color: '#fff9ed', emissive: data.color, emissiveIntensity: data.enabled ? .8 : 0, side: THREE.DoubleSide, roughness: .35 }));
     panel.quaternion.copy(light.quaternion); group.add(panel);
   } else {
-    light = data.kind === 'spot' ? new THREE.SpotLight(data.color, 1, 0, data.angle * Math.PI / 180, .35, 2) : new THREE.PointLight(data.color, 1, 0, 2);
-    light.power = data.enabled ? data.power : 0; light.castShadow = data.enabled && data.shadows && shadowsAllowed; light.shadow.mapSize.set(512, 512); light.shadow.normalBias = .015; light.shadow.bias = -.0001;
+    light = data.kind === 'spot' ? new THREE.SpotLight(data.color, 1, 0, data.angle * Math.PI / 180, .6, 2) : new THREE.PointLight(data.color, 1, 0, 2);
+    light.distance = lightRange(data); light.power = data.enabled ? data.power : 0; light.shadow.camera.near=.04; light.shadow.camera.far=lightRange(data); light.castShadow = data.enabled && data.shadows && shadowsAllowed; light.shadow.mapSize.set(512, 512); light.shadow.normalBias = .015; light.shadow.bias = -.0001;
     if (light instanceof THREE.SpotLight) { light.target.position.copy(target); group.add(light.target); }
     const bulb = new THREE.Mesh(new THREE.SphereGeometry(.06, 16, 12), new THREE.MeshStandardMaterial({ color: '#fff5df', emissive: data.color, emissiveIntensity: data.enabled ? 1.3 : 0, roughness: .2 })); group.add(bulb);
     const rim = new THREE.Mesh(new THREE.CylinderGeometry(.12, .07, .08, 24), new THREE.MeshStandardMaterial({ color: '#ece5d7', metalness: .3, roughness: .4 })); rim.position.y = .09; group.add(rim);

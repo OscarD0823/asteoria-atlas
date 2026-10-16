@@ -91,6 +91,6 @@ export function demolish(project:Project,selection:Selection):Project {
   if(selection?.kind!=='wall')return deleteSelection(project,selection);
   const wall=resolvedWalls(project).find(w=>w.aliases.includes(selection.id));if(!wall?.roomId)return deleteSelection(project,selection);
   const affected=project.rooms.filter(r=>wall.aliases.some(a=>a.startsWith(r.id+':wall:'))),removed=new Set(wall.aliases),map=new Map<string,string>();
-  const next=produce(project,p=>{for(const room of affected){p.rooms.find(r=>r.id===room.id)!.walls=false;for(const edge of roomWalls(room)){if(removed.has(edge.id))continue;const id=uid();map.set(edge.id,id);p.walls.push({id,levelId:edge.levelId,name:edge.name,a:edge.a,b:edge.b,height:edge.height,thickness:edge.thickness,color:edge.color});}}p.openings=p.openings.filter(o=>!removed.has(o.wallId));for(const opening of p.openings)opening.wallId=map.get(opening.wallId)??opening.wallId;});
+  const next=produce(project,p=>{for(const room of affected){p.rooms.find(r=>r.id===room.id)!.walls=false;for(const edge of roomWalls(room)){if(removed.has(edge.id))continue;const id=uid();map.set(edge.id,id);p.walls.push({id,levelId:edge.levelId,name:edge.name,a:edge.a,b:edge.b,height:edge.height,thickness:edge.thickness,color:edge.color,finish:edge.finish});}}p.openings=p.openings.filter(o=>!removed.has(o.wallId));for(const opening of p.openings)opening.wallId=map.get(opening.wallId)??opening.wallId;});
   parseProject(next);return next;
 }

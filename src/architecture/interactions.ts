@@ -1,3 +1,4 @@
+import { openingIsOpen } from './walk-actions';
 import { distance, projectPoint, resolvedWalls, wallOpenings, parseProject, type Point, type Project, type Selection } from './model';
 import { produce } from 'immer';
 import { indexedCanWalk } from './collisions';
@@ -31,7 +32,7 @@ export function canWalkAt(project: Project, levelId: string, p: Point, radius = 
   for (const wall of resolvedWalls(project, levelId)) {
     const nearest = projectPoint(p, wall);
     if (nearest.distance >= wall.thickness / 2 + radius) continue;
-    const door = wallOpenings(project, wall).some(o => o.kind === 'door' && o.height >= project.environment.eyeHeight + .05 && Math.abs(nearest.offset - o.offset) <= o.width / 2 - radius);
+    const door = wallOpenings(project, wall).some(o => o.kind === 'door' && openingIsOpen(o) && o.height >= project.environment.eyeHeight + .05 && Math.abs(nearest.offset - o.offset) <= o.width / 2 - radius);
     if (!door) return false;
   }
   for (const f of project.furniture.filter(f => f.levelId === levelId && f.elevation < project.environment.eyeHeight + .15)) {

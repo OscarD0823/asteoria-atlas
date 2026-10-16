@@ -27,7 +27,7 @@ Pulsa **K** o el icono de papelera para demoler con un clic. Al eliminar una par
 
 ## Acabados
 
-Abre **Acabados**, elige un suelo y toca la superficie de la habitación. El cuentagotas también puede capturar el acabado de otro suelo. El material se conserva al mover o copiar la habitación.
+Abre **Acabados**, elige **Suelo de habitación** o **Paredes** y una muestra. Puedes pintar el suelo pulsando sobre un mueble. **Aplicar a selección** pinta una habitación seleccionada; el aviso confirma el cambio. El cuentagotas también puede capturar el acabado de otro suelo. El material se conserva al mover o copiar la habitación.
 
 ## Guardado y compatibilidad
 
@@ -36,3 +36,5 @@ La biblioteca sigue siendo local. El formato v4 conserva las paredes demolidas y
 El autoguardado conserva los cambios que han terminado de persistirse en este dispositivo. Descarga un archivo editable para disponer de una copia fuera del navegador o teléfono. Un corte de energía puede perder las últimas acciones que todavía no habían terminado de guardarse.
 
 El sistema toma como referencia la comodidad de los modos de construcción de simulación doméstica, con controles, geometría, catálogo e identidad propios. No usa modelos ni recursos de Los Sims.
+
+La [guía de formatos, iluminación y recorrido](FORMATS-AND-RENDERING.md) detalla la compatibilidad y las acciones con E.
