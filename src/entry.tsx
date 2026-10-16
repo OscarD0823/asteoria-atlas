@@ -1,1 +1,1 @@
-export {default} from '@prisma/core/architecture/entry';
+export {default} from './architecture/entry';

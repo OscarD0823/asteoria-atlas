@@ -1,9 +1,9 @@
 {
   "product": "architecture",
-  "name": "Asteoria Atlas",
+  "name": "Auralis Atlas",
   "channel": "beta",
-  "website": "https://oscard0823.github.io/asteoria-atlas/",
-  "sourceRepository": "OscarD0823/asteoria-atlas",
-  "sharedRepository": "OscarD0823/asteoria",
+  "website": "https://oscard0823.github.io/auralis-atlas/",
+  "sourceRepository": "OscarD0823/auralis-atlas",
+  "sharedRepository": "OscarD0823/auralis",
   "sourceRef": "main"
 }
